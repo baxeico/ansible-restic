@@ -28,7 +28,16 @@ ExecStart={{ restic_path }} backup --verbose {{ folder.path }} {{ folder.exclude
 {% endfor -%}
 
 {% for database in restic_databases %}
-ExecStart=/bin/sh -c "{{ database.dump_command }} {{ '| gzip |' if restic_dump_compression_enabled else '|' }} {{ restic_path }} backup --verbose --stdin --stdin-filename {{ database.name }}{{ '.sql.gz' if restic_dump_compression_enabled else '.sql' }}"
+{% if database.dump_command is defined %}
+{% set dump_command = database.dump_command %}
+{% elif database.type is defined and database.type == 'mysql' %}
+{% set dump_command = 'mysqldump --single-transaction --quick --skip-extended-insert --routines --no-tablespaces -u' + database.username + ' -p' + database.password + ' ' + database.name %}
+{% elif database.type == 'postgres' %}
+{% set dump_command = 'sudo -Hiu postgres pg_dump -C ' + database.name %}
+{% endif %}
+{% if dump_command is defined %}
+ExecStart=/bin/sh -c "{{ dump_command }} {{ '| gzip |' if restic_dump_compression_enabled else '|' }} {{ restic_path }} backup --verbose --stdin --stdin-filename {{ database.name }}{{ '.sql.gz' if restic_dump_compression_enabled else '.sql' }}"
+{% endif %}
 {% endfor -%}
 
 {% if restic_forget %}
