@@ -16,6 +16,8 @@
       HostName {{ restic_ssh_hostname }}
       IdentityFile {{ restic_ssh_private_key_path }}
       Port {{ restic_ssh_port }}
+      ServerAliveInterval 60
+      ServerAliveCountMax 240
     owner: root
     group: root
     mode: '0600'
