@@ -21,6 +21,7 @@ Environment="AWS_SECRET_ACCESS_KEY={{ restic_aws_secret_access_key}}"
 
 {% if restic_check %}
 ExecStartPre={{ restic_path }} check
+ExecStartPre={{ restic_path }} unlock
 {% endif -%}
 
 {% for folder in restic_folders_combined %}
