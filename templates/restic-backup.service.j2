@@ -25,7 +25,7 @@ ExecStartPre={{ restic_path }} check
 {% endif -%}
 
 {% for folder in restic_folders_combined %}
-ExecStart={{ restic_path }} backup --verbose {{ folder.path }} {{ folder.exclude if folder.exclude is defined else '' }}
+ExecStart=-{{ restic_path }} backup --verbose {{ folder.path }} {{ folder.exclude if folder.exclude is defined else '' }}
 {% endfor -%}
 
 {% for database in restic_databases %}
@@ -37,7 +37,7 @@ ExecStart={{ restic_path }} backup --verbose {{ folder.path }} {{ folder.exclude
 {% set dump_command = 'sudo -Hiu postgres pg_dump -C ' + database.name %}
 {% endif %}
 {% if dump_command is defined %}
-ExecStart=/bin/sh -c "{{ dump_command }} {{ '| gzip |' if restic_dump_compression_enabled else '|' }} {{ restic_path }} backup --verbose --stdin --stdin-filename {{ database.name }}{{ '.sql.gz' if restic_dump_compression_enabled else '.sql' }}"
+ExecStart=-/bin/sh -c "{{ dump_command }} {{ '| gzip |' if restic_dump_compression_enabled else '|' }} {{ restic_path }} backup --verbose --stdin --stdin-filename {{ database.name }}{{ '.sql.gz' if restic_dump_compression_enabled else '.sql' }}"
 {% endif %}
 {% endfor -%}
 
